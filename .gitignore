@@ -1,0 +1,60 @@
+# Python ignores #
+##################
+*.pyc
+# C++ ignores #
+###############
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Data files
+*.csv
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.iso
+*.rar
+*.tar
+*.zip
+
+# OS generated files #
+######################
+*.swp
+.DS_Store
+.idea
+.idea?
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

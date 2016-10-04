@@ -1,0 +1,25 @@
+# Default configs for a word embedding training task
+# NOTICE: 'task_name' is used to generated sub folder for serialized data, model
+# and results. Use same task_name will overwrite previous results. Make sure you
+# need to overwrite. Use a seperate task name (ideally with some key parameters)
+# taks name should be compatible with OS naming rules.
+# Run: python -m tf_nlp.word_emb.run --help to see detailed explanations of all
+# parameters.
+word_emb:
+    batch_size: 80
+    ck_point: 2000
+    context_size: 2
+    emb_dim: 200
+    eps: 1e-04
+    epoch: 3
+    input_dir: './data'
+    model_dir: './model'
+    model: 'cbow'
+    neg_size: 15
+    output_dir: './embeds'
+    preload: 0
+    report: 500
+    rcm: 0
+    task_name: 'task'
+    third_paty: './third_party'
+    vocab_size: 50000
