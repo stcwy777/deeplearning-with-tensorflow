@@ -30,7 +30,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 # Inner reference
 from tf_nlp.cfg import *
-from tf_nlp.utils import get_csv_reader
+from tf_nlp.utils import get_csv_reader, _SEQ2SEQ_EXTR_VOCAB
 
 # TODO: evaluate graph; self-test on public data; relation embedding...
 
@@ -305,7 +305,7 @@ class Corpus(object):
 
     def load_by_lines(self, path, use_filter=True, use_stem=True,
                       use_lemma=True, add_eos=True, add_eot=False,
-                      conv_num=True, store_words=True):
+                      conv_num=True, store_words=True, cutoff=0):
         """Load sequences of words from a document by lines. Apply proper
         pre-processing based on parameters. By default, one line is considered
         as a sentence
@@ -320,6 +320,7 @@ class Corpus(object):
             conv_num: normalize numbers. (see norm_num function)
             store_words: store all words in a inner list. Set true for training
                          word embeddings
+            cutoff: integer index to cut input words
 
         Returns:
             lines: a dictionary of processed corpus {line_num: tokens}
@@ -336,7 +337,7 @@ class Corpus(object):
                         lowers = re.sub(reg, '', lowers)
 
                 tokens = self.tokenize(lowers)
-
+                # tokens = lowers.split()
                 if use_stem:
                     tokens = self.stem_tokens(tokens)
                 if use_lemma:
@@ -352,6 +353,8 @@ class Corpus(object):
                     self.words.extend(tokens)
 
                 self.raw_data.extend(tokens)
+                if cutoff > 0:
+                    tokens = tokens[:cutoff]
                 lines[len(lines)] = tokens
         return lines
 
@@ -444,6 +447,106 @@ class Corpus(object):
 
         return self.seq_data, self.pw_data, self.word2idx, \
                self.idx2word, self.count
+
+    def build_vocab_to_file(self, output_path, vocab_size=DEF_VOCAB_SIZE,
+                            dft_idx=_SEQ2SEQ_EXTR_VOCAB):
+        """Generate vocabulary over the extracted words. Save the vocabulary to
+        local files. This functions is used to work with other functions
+        that load vocabulary from a local file. Each line is a single word
+
+        Args:
+            vocab_size: vocabulary size
+            output_path: where to output the vocabulary
+            dft_idx: default extra word index for PAD, EOS and etc.
+        Returns:
+            vocab_size: size of the vocabulary
+        """
+
+        # Setup vocabulary and cut off by frequency
+        word_counter = map(list, Counter(self.words).most_common(vocab_size))
+        self.word2idx = {}
+
+        # Set index for default words
+        for word in dft_idx:
+            self.word2idx[word] = len(self.word2idx)
+        # Set index for vocab ordered by counts
+        for (word, count) in word_counter:
+            self.word2idx[word] = len(self.word2idx)
+
+        # Get reverse vocab
+        self.idx2word = dict(zip(self.word2idx.values(), self.word2idx.keys()))
+
+        # Write vocabulary to file
+        with open(output_path, 'w') as output:
+            for word, idx in self.word2idx.items():
+                output.write('%s,%d\n' % (word, idx))
+        vocab_size = len(self.word2idx)
+
+        return vocab_size
+
+    def load_vocab_from_file(self, input_path):
+        """Load vocabulary from a document. Assuming each line in a format:
+        'word,id'.
+
+        Args:
+            input_path: where to load the vocabulary
+        Returns:
+            vocab_size: size of the loaded vocabulary
+            word2idx: word to index dictionary
+            word2idx: index to word dictionary
+        """
+        self.word2idx = {}
+        self.idx2word = {}
+        # Write vocabulary to file
+        with open(input_path, 'r') as input:
+            for line in input:
+                try:
+                    (word, idx) = line.rstrip().split(',')
+                except ValueError:
+                    data = line.rstrip().split(',')
+                    idx = int(data[-1])
+                    word = ','.join(data[:-1])
+                self.word2idx[word] = int(idx)
+                self.idx2word[int(idx)] = word
+        vocab_size = len(self.word2idx)
+
+        return vocab_size, self.word2idx, self.idx2word
+
+    def doc_to_ids(self, sents, output_path):
+        """Convert document (a list of sentences) into integer tokens.
+        Need to load vocabulary first. Converted tokens are written to a
+        specified local document. Sentences should be read before thru func
+         'load_by_lines'
+
+        Args:
+            sents: input sentences
+            output_path: where to output the converted sentences
+        """
+
+        if len(sents) == 0:
+            raise IOError('No sentences data found')
+        with open(output_path, 'w') as output:
+            for i in xrange(len(sents)):
+                # print sents[i]
+                token_ids = [self.word2idx[word] for word in sents[i]]
+                output.write('%s\n' % ' '.join(map(str, token_ids)))
+                # print token_ids
+
+    # def sen_to_ids(self, sentence):
+    #     """Convert a sentence into a list of integer tokens.
+    #
+    #     Args:
+    #         sentence: input sentences
+    #     """
+    #
+    #     if len(sents) == 0:
+    #         raise IOError('No sentences data found')
+    #     with open(output_path, 'w') as output:
+    #         for i in xrange(len(sents)):
+    #             # print sents[i]
+    #             token_ids = [self.word2idx[word] for word in sents[i]]
+    #             output.write('%s\n' % ' '.join(map(str, token_ids)))
+    #             # print token_ids
 
     def ret_domain_key_words(self, top_k=50):
         """Return a list of top k frequent words from input corpus. Stopwords,
