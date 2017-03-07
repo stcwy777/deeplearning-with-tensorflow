@@ -1,0 +1,18 @@
+# Default configs for a seq2seq experiment
+# Run: python -m tf_nlp.seq2seq.run --help to see detailed explanations of all
+# parameters.
+seq2seq:
+    learning_rate: 0.5
+    learning_rate_decay_factor: 0.99
+    max_gradient_norm: 5.0
+    batch_size: 80
+    cell_size: 512
+    num_layers: 3
+    que_vocab_size: 3000
+    ans_vocab_size: 3000
+    data_dir: './qa-data'
+    model_dir: './qa-model'
+    max_train_data_size: 0
+    ck_point: 5000
+    decode: 0
+    third_paty: './third_party'

@@ -1,0 +1,11 @@
+# Default configs for a seq2seq experiment
+# Run: python -m tf_nlp.seq2seq.run --help to see detailed explanations of all
+# parameters.
+seq2seq:
+    data_dir: './qa-data'
+    model_dir: './qa-model'
+    decode: 1
+    beam: 10
+    test_file: 'test-src.txt'
+    task_name: 'test'
+    third_paty: './third_party'

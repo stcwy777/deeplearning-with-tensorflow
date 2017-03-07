@@ -10,6 +10,17 @@ import csv
 
 __author__ = 'yunwang@us.ibm.com (Yun Wang)'
 
+# Special vocabulary symbols - used by TensorFlow seq2seq lib
+_PAD = "_PAD"
+_GO = "_GO"
+_EOS = "_EOS"
+_UNK = "_UNK"
+PAD_ID = 0
+GO_ID = 1
+EOS_ID = 2
+UNK_ID = 3
+_SEQ2SEQ_EXTR_VOCAB = [_PAD, _GO, _EOS, _UNK]
+
 
 def get_csv_reader(file_obj):
     """Get a line iterator from a CSV file. Check if the CSV file contains a

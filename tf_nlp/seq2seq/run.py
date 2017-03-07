@@ -42,7 +42,7 @@ from tensorflow.models.rnn.translate import data_utils
 
 # Inner reference
 from tf_nlp.proc_corpus.corpus import Corpus
-from tf_nlp.seq2seq.tf_seqseq_model import *
+from tf_nlp.seq2seq.tf_seq2seq_model import *
 from tf_nlp.utils import _UNK, EOS_ID
 
 # Use TF API to conveniently define parameters
@@ -323,7 +323,7 @@ def decode(input_file, beam_size=0):
                 seq += 1
                 # Get token-ids for the input sentence.
                 conv_sent = []
-                for word in sentence:
+                for word in sentence.split():
                     try:
                         conv_sent.append(src_vocab[word])
                     except KeyError:
@@ -364,7 +364,6 @@ def decode(input_file, beam_size=0):
                                                              target_weights,
                                                              bucket_id,
                                                              True, True)
-                    print output_logits
                     # Extract symbols from beam
                     paths = []
                     for _ in xrange(beam_size):

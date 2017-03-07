@@ -10,7 +10,7 @@ training steps.
 
 Usage:
 from the project root folder (.../cogn-dialog), type:
-    python -m prac_tf.word_emb.run --help
+    python -m tf_nlp.word_emb.run --help
 to see how different parameters feed the script.
 """
 
