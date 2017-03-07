@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+"""Train a seq2seq model
+
+Read model parameters from specified YAML, then run seq2seq test from shell.
+"""
+# Python default
+import argparse
+import os
+import subprocess
+# Third party
+import yaml
+
+__author__ = 'yunw@email.arizona.edu (Yun Wang)'
+
+# Setup shell command parser
+parser = argparse.ArgumentParser(description='Train seq2seq model')
+parser.add_argument("-f", "--file",
+                    dest="filename",
+                    help="read configs from YAML",
+                    default='./config/seq2seq_train_def.yaml',
+                    metavar="FILE")
+args = parser.parse_args()
+file_name = args.filename
+
+# Read YAML from specified location
+if not file_name.endswith('.yaml') or not os.path.isfile(file_name):
+    IOError('Can not find valid configuration files')
+
+print 'Read configurations from %s' % file_name
+
+with open(file_name, 'r') as yaml_file:
+    yaml_config = yaml.safe_load(yaml_file)
+    we_config = yaml_config['seq2seq']
+    # Call the actual model to build word embeddings
+    subprocess.call(['python', '-m', 'tf_nlp.seq2seq.run',
+                     '--learning_rate', '%f' % we_config['learning_rate'],
+                     '--learning_rate_decay_factor', '%f' % we_config['learning_rate_decay_factor'],
+                     '--max_gradient_norm', '%f' % float(we_config['max_gradient_norm']),
+                     '--batch_size', '%d' % we_config['batch_size'],
+                     '--cell_size', '%d' % we_config['cell_size'],
+                     '--num_layers', '%s' % we_config['num_layers'],
+                     '--que_vocab_size', '%d' % we_config['que_vocab_size'],
+                     '--ans_vocab_size', '%d' % we_config['ans_vocab_size'],
+                     '--data_dir', '%s' % we_config['data_dir'],
+                     '--model_dir', '%s' % we_config['model_dir'],
+                     '--max_train_data_size', '%d' % we_config['max_train_data_size'],
+                     '--ck_point', '%d' % we_config['ck_point'],
+                     '--decode', '%d' % 0,
+                     '--third_paty', '%s' % we_config['third_paty']
+                     ])
